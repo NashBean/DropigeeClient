@@ -1,6 +1,6 @@
 //
 //  DropigeeClientAPI.h
-//  Drpigee
+//  Dropigee
 //
 //  Created by nash on 11/12/15.
 //  Copyright 2015 iBean Software. 
@@ -9,11 +9,26 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include "oauth2cpp/TokenInfo.hpp"
+
 
 const int DCAPI_MAJOR_VERSION = 0;
-const int DCAPI_MINOR_VERSION = 1;
+const int DCAPI_MINOR_VERSION = 2;
 
 # define APIcom "api.dropigee.com"
+
+namespace {
+    enum {
+        REQUEST_TYPE = QNetworkRequest::User
+    };
+    
+    enum{
+        REQUEST_TOKEN,
+        REQUEST_REFRESH,
+        REQUEST_API
+    };
+}
+
 
 struct accept_header
 {//Accept: application/vnd.dropigee.v1+json
@@ -25,7 +40,7 @@ struct accept_header
 //  YYYY-MM-DDTHH:MM:SSZ
 enum Client_Errors
 {
-    ce_NoErrer = 0,
+    ce_NoError = 0,
     ce_Unauthorized = 401,  //   401 Unauthorized.
     ce_Unprocessable = 422 
     //Sending invalid fields will result in a - 422 Unprocessable Entity response.
@@ -120,7 +135,7 @@ class DCAPI
     web_access_token wat;
     
 public:
-    bool non_web
+    bool non_web;
 };
 
 
@@ -131,4 +146,24 @@ class DropigeeClient : private DCAPI
 public:
     
 };
+
+class OAUTH2CPP_API TokenInfo
+{
+public:
+    virtual std::string getAccessToken() const = 0;
+    virtual std::string getRefreshToken() const = 0;
+    virtual std::string getType() const = 0;
+    virtual uint32_t expiresIn() const = 0;
+    
+    virtual void setAccessToken(const std::string& value) = 0;
+    virtual void setRefreshToken(const std::string& value) = 0;
+    virtual void setType(const std::string& value) = 0;
+    virtual void expiresIn(uint32_t value) = 0;
+    
+    virtual bool hasAccessToken() = 0;
+    virtual bool hasRefreshToken() = 0;
+    
+    virtual ~TokenInfo() = default;
+};
+
 
