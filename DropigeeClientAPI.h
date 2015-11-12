@@ -6,14 +6,24 @@
 //  Copyright 2015 iBean Software. 
 //  All rights reserved.
 //
+
+#ifndef Dropigee_Client_API_h
+#define Dropigee_Client_API_h
+
 #include <vector>
 #include <string>
 #include <sstream>
-#include "oauth2cpp/TokenInfo.hpp"
+//#include "oauth2cpp/TokenInfo.hpp"
+#include "oauth2cpp/DefaultStorage.hpp"
+
 
 
 const int DCAPI_MAJOR_VERSION = 0;
 const int DCAPI_MINOR_VERSION = 2;
+
+
+namespace dropigee 
+{
 
 # define APIcom "api.dropigee.com"
 
@@ -67,6 +77,30 @@ struct access_parameters
     std::string scope; 	//A list of scopes separated by spaces. If not provided, scope defaults to an empty list of scopes for users that don’t have a valid token for the app.
     std::string state; 	// protection string.
 };
+    class DropigeeToken : public OAUTH2CPP_API BearerToken 
+    {
+    public:
+        BearerToken();
+        ~BearerToken();
+        
+        // TokenInfo interface
+        std::string getAccessToken() const override;
+        std::string getRefreshToken() const override;
+        std::string getType() const override;
+        uint32_t expiresIn() const override;
+        void setAccessToken(const std::string &value) override;
+        void setRefreshToken(const std::string &value) override;
+        void setType(const std::string &value) override {}
+        void expiresIn(uint32_t value) override;
+        bool hasAccessToken() override;
+        bool hasRefreshToken() override;
+        
+    private:
+        std::string accessToken;
+        std::string refreshToken;
+        uint32_t expireValue;
+    };
+
 
 //(2.) Dropigee redirects back to your site
 
@@ -130,40 +164,51 @@ struct non_web_access_token
  
 */
 
-class DCAPI 
-{
-    web_access_token wat;
-    
-public:
-    bool non_web;
-};
+    class DCAPI 
+    {
+        web_access_token wat;
+    public:
+        bool non_web;
+    };
 
+    class DropigeeClient : private DCAPI
+    {
+    public:
+    };
+    
+//* rem switch   
+    class Dropigee_API: public OAUTH2CPP_API 
+    {
+    public:
+        virtual HttpRequest* createRequest() const = 0;
+        virtual void get(HttpRequest* request) = 0;
+        virtual void post(HttpRequest* request, const std::string& data) = 0;
+    };
+    
+/*/
 
-class DropigeeClient : private DCAPI
-{
-    
-    
-public:
-    
-};
+    class Dropigee_API: public OAUTH2CPP_API
+    {
+    public:
+        std::string getAccessToken() const = 0;
+        std::string getRefreshToken() const = 0;
+        std::string getType() const = 0;
+        uint32_t expiresIn() const = 0;
+        
+        void setAccessToken(const std::string& value) = 0;
+        void setRefreshToken(const std::string& value) = 0;
+        void setType(const std::string& value) = 0;
+        void expiresIn(uint32_t value) = 0;
+        
+        bool hasAccessToken() = 0;
+        bool hasRefreshToken() = 0;
+        
+        ~TokenInfo() = default;
+        
+    private:
+    };
+//*/        
+}// end of namespace dropigee 
 
-class OAUTH2CPP_API TokenInfo
-{
-public:
-    virtual std::string getAccessToken() const = 0;
-    virtual std::string getRefreshToken() const = 0;
-    virtual std::string getType() const = 0;
-    virtual uint32_t expiresIn() const = 0;
-    
-    virtual void setAccessToken(const std::string& value) = 0;
-    virtual void setRefreshToken(const std::string& value) = 0;
-    virtual void setType(const std::string& value) = 0;
-    virtual void expiresIn(uint32_t value) = 0;
-    
-    virtual bool hasAccessToken() = 0;
-    virtual bool hasRefreshToken() = 0;
-    
-    virtual ~TokenInfo() = default;
-};
-
+#endif // Dropigee_Client_API_h
 
